@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String
+  password  String
+  role      String    @default("PATIENT")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  patientProfile PatientProfile?
+  devices        Device[]
+  doctorPatients DoctorPatient[]
+  relatives      Relative[]       @relation("RelativeUser")
+  patientRelatives Relative[]     @relation("PatientUser")
+  alerts         Alert[]
+  alertRules     DeviceAlertRule[]
+
+  @@map("users")
+}
+
+
+
+model PatientProfile {
+  id                   Int       @id @default(autoincrement())
+  userId               Int       @unique
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  medicalHistory       String?
+  allergies            String?
+  chronicConditions    String?
+  emergencyContactName String?
+  emergencyContactPhone String?
+  bloodType            String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@map("patient_profiles")
+}
+
+model DoctorPatient {
+  id        Int       @id @default(autoincrement())
+  doctorId  Int
+  doctor    User      @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  patientId Int
+  assignedAt DateTime @default(now())
+
+  @@unique([doctorId, patientId])
+  @@map("doctor_patients")
+}
+
+model Relative {
+  id            Int       @id @default(autoincrement())
+  patientId     Int
+  patient       User      @relation("PatientUser", fields: [patientId], references: [id], onDelete: Cascade)
+  relativeUserId Int
+  relativeUser  User      @relation("RelativeUser", fields: [relativeUserId], references: [id], onDelete: Cascade)
+  relation      String    // e.g., "spouse", "parent", "sibling"
+  createdAt     DateTime  @default(now())
+
+  @@unique([patientId, relativeUserId])
+  @@map("relatives")
+}
+
+model Device {
+  id        Int       @id @default(autoincrement())
+  patientId Int
+  patient   User      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  deviceId  String    @unique
+  deviceName String
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  deviceData DeviceData[]
+  alertRules DeviceAlertRule[]
+
+  @@map("devices")
+}
+
+model DeviceData {
+  id        Int       @id @default(autoincrement())
+  deviceId  Int
+  device    Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  temperature Float?
+  heartRate Int?
+  spO2      Int?
+  latitude  Float?
+  longitude Float?
+  timestamp DateTime  @default(now())
+
+  @@index([deviceId])
+  @@index([timestamp])
+  @@map("device_data")
+}
+
+model Alert {
+  id        Int       @id @default(autoincrement())
+  patientId Int
+  patient   User      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  type      String    // e.g., "high_temperature", "irregular_heartbeat"
+  severity  String    // "low", "medium", "high", "critical"
+  message   String
+  latitude  Float?
+  longitude Float?
+  isViewed  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  viewedAt  DateTime?
+
+  @@index([patientId])
+  @@index([createdAt])
+  @@map("alerts")
+}
+
+model DeviceAlertRule {
+  id           Int       @id @default(autoincrement())
+  patientId    Int
+  patient      User      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  deviceId     Int?
+  device       Device?   @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  metricType   String    // e.g., "temperature", "heartRate"
+  minThreshold Float?
+  maxThreshold Float?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([patientId])
+  @@map("device_alert_rules")
+}
