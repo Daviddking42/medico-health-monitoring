@@ -16,8 +16,8 @@ apiClient.interceptors.request.use((config) => {
 });
 
 export const authAPI = {
-  register: (email, name, password, role) =>
-    apiClient.post('/auth/register', { email, name, password, role }),
+  register: (data) =>
+    apiClient.post('/auth/register', data),
   login: (email, password) =>
     apiClient.post('/auth/login', { email, password }),
   getProfile: () =>
