@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, ActivityIndicator, TextInput, Alert, Button } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LogOut, Activity, User, AlertCircle, Thermometer, Heart, Wind } from 'lucide-react-native';
+import { LogOut, Activity, User, AlertCircle, Thermometer, Heart, Wind, Search } from 'lucide-react-native';
 import { useAuth } from '../context/AuthContext';
 import { relativeAPI } from '../services/api';
 
@@ -10,6 +10,8 @@ export default function RelativeDashboardScreen() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchName, setSearchName] = useState('');
+  const [linking, setLinking] = useState(false);
 
   const fetchPatients = async () => {
     try {
@@ -30,6 +32,26 @@ export default function RelativeDashboardScreen() {
   const onRefresh = () => {
     setRefreshing(true);
     fetchPatients();
+  };
+
+  const handleLinkPatient = async () => {
+    if (!searchName.trim()) {
+      Alert.alert('Error', 'Please enter a patient name');
+      return;
+    }
+    
+    setLinking(true);
+    try {
+      await relativeAPI.linkPatient(searchName.trim());
+      Alert.alert('Success', `Successfully linked to ${searchName}`);
+      setSearchName('');
+      fetchPatients(); // Refresh the list
+    } catch (error) {
+      console.error('Error linking patient:', error);
+      Alert.alert('Error', error.response?.data?.error || 'Failed to link patient');
+    } finally {
+      setLinking(false);
+    }
   };
 
   const getStatusColor = (vitals, alerts) => {
@@ -113,6 +135,30 @@ export default function RelativeDashboardScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputWrapper}>
+          <Search color="#9ca3af" size={20} style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Link Patient by Name..."
+            value={searchName}
+            onChangeText={setSearchName}
+            autoCapitalize="words"
+          />
+        </View>
+        <TouchableOpacity 
+          style={[styles.linkBtn, (!searchName.trim() || linking) && styles.linkBtnDisabled]}
+          onPress={handleLinkPatient}
+          disabled={!searchName.trim() || linking}
+        >
+          {linking ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.linkBtnText}>Link</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
       {loading ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#3b82f6" />
@@ -165,6 +211,47 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  searchInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    height: 44,
+    fontSize: 16,
+    color: '#1f2937',
+  },
+  linkBtn: {
+    backgroundColor: '#3b82f6',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  linkBtnDisabled: {
+    backgroundColor: '#9ca3af',
+  },
+  linkBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: '#fff',
