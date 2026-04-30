@@ -9,11 +9,15 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const register = useCallback(async (email, name, password, role) => {
+  const register = useCallback(async (email, name, password, role, patientName) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authAPI.register(email, name, password, role);
+      const data = { email, name, password, role };
+      if (role === 'RELATIVE' && patientName) {
+        data.patientName = patientName;
+      }
+      const response = await authAPI.register(data);
       return response.data;
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed');
