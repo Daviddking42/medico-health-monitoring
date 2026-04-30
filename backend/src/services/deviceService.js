@@ -44,6 +44,23 @@ const recordDeviceData = async (deviceId, data) => {
         longitude: data.longitude
       }
     });
+
+    // Fetch device to get patientId
+    const device = await prisma.device.findUnique({
+      where: { id: deviceId }
+    });
+
+    if (device && device.patientId) {
+      // Update the patient profile directly with the latest vital stats
+      await prisma.patientProfile.update({
+        where: { userId: device.patientId },
+        data: {
+          currentTemperature: data.temperature,
+          currentHeartRate: data.heartRate
+        }
+      });
+    }
+
     return deviceData;
   } catch (error) {
     throw error;
