@@ -4,6 +4,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import LoginScreen from './src/screens/LoginScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
+import DoctorDashboardScreen from './src/screens/DoctorDashboardScreen';
+import RelativeDashboardScreen from './src/screens/RelativeDashboardScreen';
 import { StatusBar } from 'expo-status-bar';
 
 const Stack = createStackNavigator();
@@ -16,7 +18,13 @@ const Navigation = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
-        <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        user.role === 'DOCTOR' ? (
+          <Stack.Screen name="DoctorDashboard" component={DoctorDashboardScreen} />
+        ) : user.role === 'RELATIVE' ? (
+          <Stack.Screen name="RelativeDashboard" component={RelativeDashboardScreen} />
+        ) : (
+          <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        )
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} />
       )}
