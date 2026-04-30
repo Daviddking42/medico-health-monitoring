@@ -8,5 +8,6 @@ router.use(protect);
 
 router.get('/patients', relativeController.getPatients);
 router.get('/patients/:patientId/vitals', relativeController.getPatientVitals);
+router.post('/link', relativeController.linkPatient);
 
 module.exports = router;
