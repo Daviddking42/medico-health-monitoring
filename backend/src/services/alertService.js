@@ -12,6 +12,12 @@ const createAlert = async (patientId, type, severity, message, latitude, longitu
         longitude
       }
     });
+
+    // Emit real-time alert to the patient's room (doctors and relatives can join this room)
+    if (global.io) {
+      global.io.to(`patient-${patientId}`).emit('new-alert', alert);
+    }
+
     return alert;
   } catch (error) {
     throw error;
