@@ -2,13 +2,17 @@ const authService = require('../services/authService');
 
 const register = async (req, res) => {
   try {
-    const { email, name, password, role } = req.body;
+    const { email, name, password, role, patientName } = req.body;
     
     if (!email || !name || !password || !role) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const user = await authService.registerUser(email, name, password, role);
+    if (role === 'RELATIVE' && !patientName) {
+      return res.status(400).json({ error: 'Patient name is required when registering as a Relative' });
+    }
+
+    const user = await authService.registerUser(email, name, password, role, patientName);
     res.status(201).json({ 
       message: 'User registered successfully',
       user: {
