@@ -32,7 +32,26 @@ const getPatientVitals = async (req, res) => {
   }
 };
 
+const linkPatient = async (req, res) => {
+  try {
+    if (req.user.role !== 'RELATIVE') {
+      return res.status(403).json({ error: 'Access denied: Relatives only' });
+    }
+
+    const { patientName } = req.body;
+    if (!patientName) {
+      return res.status(400).json({ error: 'Patient name is required' });
+    }
+
+    const link = await relativeService.linkPatientByName(req.user.id, patientName);
+    res.json({ success: true, link });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getPatients,
-  getPatientVitals
+  getPatientVitals,
+  linkPatient
 };
