@@ -39,6 +39,7 @@ export const doctorAPI = {
 export const relativeAPI = {
   getPatients: () => api.get('/relative/patients'),
   getPatientVitals: (patientId) => api.get(`/relative/patients/${patientId}/vitals`),
+  linkPatient: (patientName) => api.post('/relative/link', { patientName }),
 };
 
 export default api;
