@@ -42,6 +42,8 @@ model PatientProfile {
   emergencyContactName String?
   emergencyContactPhone String?
   bloodType            String?
+  currentTemperature   Float?
+  currentHeartRate     Int?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
