@@ -80,9 +80,9 @@ const Home = () => {
             <h4>Follow Us</h4>
             <div className="social-icons">
               <a href="mailto:davidkingmark425@gmail.com"><i className="fab fa-google"></i></a>
-              <a href="#"><i className="fab fa-facebook"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-linkedin"></i></a>
+              <a href="#!"><i className="fab fa-facebook"></i></a>
+              <a href="#!"><i className="fab fa-twitter"></i></a>
+              <a href="#!"><i className="fab fa-linkedin"></i></a>
             </div>
           </div>
         </div>
