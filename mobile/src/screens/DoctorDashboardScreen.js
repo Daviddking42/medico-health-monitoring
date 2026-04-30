@@ -49,7 +49,15 @@ export default function DoctorDashboardScreen() {
   };
 
   const renderPatientCard = ({ item }) => {
-    const statusColor = getStatusColor(item.latestVitals, item.recentAlerts);
+    // Prefer the new profile-level vitals as requested by user, fallback to latestVitals
+    const displayVitals = {
+      temperature: item.profile?.currentTemperature || item.latestVitals?.temperature,
+      heartRate: item.profile?.currentHeartRate || item.latestVitals?.heartRate,
+      spO2: item.latestVitals?.spO2
+    };
+
+    const hasData = displayVitals.temperature || displayVitals.heartRate || displayVitals.spO2;
+    const statusColor = getStatusColor(hasData ? displayVitals : null, item.recentAlerts);
     
     return (
       <TouchableOpacity style={styles.card}>
@@ -61,19 +69,19 @@ export default function DoctorDashboardScreen() {
           <View style={[styles.statusIndicator, { backgroundColor: statusColor }]} />
         </View>
 
-        {item.latestVitals ? (
+        {hasData ? (
           <View style={styles.vitalsGrid}>
             <View style={styles.vitalItem}>
               <Heart color="#ef4444" size={16} />
-              <Text style={styles.vitalValue}>{item.latestVitals.heartRate} bpm</Text>
+              <Text style={styles.vitalValue}>{displayVitals.heartRate ? displayVitals.heartRate + ' bpm' : '--'}</Text>
             </View>
             <View style={styles.vitalItem}>
               <Thermometer color="#f59e0b" size={16} />
-              <Text style={styles.vitalValue}>{item.latestVitals.temperature}°C</Text>
+              <Text style={styles.vitalValue}>{displayVitals.temperature ? displayVitals.temperature + '°C' : '--'}</Text>
             </View>
             <View style={styles.vitalItem}>
               <Wind color="#3b82f6" size={16} />
-              <Text style={styles.vitalValue}>{item.latestVitals.spO2}%</Text>
+              <Text style={styles.vitalValue}>{displayVitals.spO2 ? displayVitals.spO2 + '%' : '--'}</Text>
             </View>
           </View>
         ) : (
