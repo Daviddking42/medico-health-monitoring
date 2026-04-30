@@ -10,7 +10,8 @@ const authRoutes = require('./routes/authRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');
 const alertRoutes = require('./routes/alertRoutes');
-
+const doctorRoutes = require('./routes/doctorRoutes');
+const relativeRoutes = require('./routes/relativeRoutes');
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -34,7 +35,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/alerts', alertRoutes);
-
+app.use('/api/doctor', doctorRoutes);
+app.use('/api/relative', relativeRoutes);
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running' });
